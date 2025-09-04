@@ -1,0 +1,12 @@
+[core]
+# Default skeleton. The workspace is mounted at /workspace.
+workspace = "/workspace"
+
+[logging]
+level = "info"
+
+# Uncomment to add MCP servers
+# [mcp]
+# servers = [
+#   # { name = "fs", command = "mcp-filesystem", args = ["--root", "/workspace"] }
+# ]

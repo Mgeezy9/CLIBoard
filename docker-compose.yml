@@ -1,0 +1,132 @@
+services:
+  codex:
+    build:
+      context: ./cli-runner/docker
+    image: ${CLI_RUNNER_IMAGE:-cli-runner:latest}
+    environment:
+      ENGINE: codex
+    volumes:
+      - ${CODEX_WORKSPACE:-./cli-runner/volumes/workspace}:/workspace:rw
+      - ${CODEX_CREDS:-./cli-runner/volumes/creds}:/home/agent/.creds:rw
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    user: "${UID:-1000}:${GID:-1000}"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=256m
+    cpus: ${CODEX_CPUS:-1.0}
+    mem_limit: ${CODEX_MEM:-2g}
+
+  warm-codex:
+    build:
+      context: ./cli-runner/docker
+    image: ${CLI_RUNNER_IMAGE:-cli-runner:latest}
+    environment:
+      ENGINE: codex
+    volumes:
+      - ${CODEX_WORKSPACE:-./cli-runner/volumes/workspace}:/workspace:rw
+      - ${CODEX_CREDS:-./cli-runner/volumes/creds}:/home/agent/.creds:rw
+    working_dir: /workspace
+    tty: true
+    entrypoint: ["bash","-lc","sleep infinity"]
+    labels:
+      adz.warm: "true"
+      adz.engine: "codex"
+      adz.workspace: ${CODEX_WORKSPACE:-./cli-runner/volumes/workspace}
+      adz.creds: ${CODEX_CREDS:-./cli-runner/volumes/creds}
+    user: "${UID:-1000}:${GID:-1000}"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=256m
+    cpus: ${CODEX_CPUS:-1.0}
+    mem_limit: ${CODEX_MEM:-2g}
+
+  gemini:
+    build:
+      context: ./cli-runner/docker
+    image: ${CLI_RUNNER_IMAGE:-cli-runner:latest}
+    environment:
+      ENGINE: gemini
+    volumes:
+      - ${GEMINI_WORKSPACE:-./cli-runner/volumes/workspace}:/workspace:rw
+      - ${GEMINI_CREDS:-./cli-runner/volumes/creds}:/home/agent/.creds:rw
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    user: "${UID:-1000}:${GID:-1000}"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=256m
+    cpus: ${GEMINI_CPUS:-1.0}
+    mem_limit: ${GEMINI_MEM:-2g}
+
+  warm-gemini:
+    build:
+      context: ./cli-runner/docker
+    image: ${CLI_RUNNER_IMAGE:-cli-runner:latest}
+    environment:
+      ENGINE: gemini
+    volumes:
+      - ${GEMINI_WORKSPACE:-./cli-runner/volumes/workspace}:/workspace:rw
+      - ${GEMINI_CREDS:-./cli-runner/volumes/creds}:/home/agent/.creds:rw
+    working_dir: /workspace
+    tty: true
+    entrypoint: ["bash","-lc","sleep infinity"]
+    labels:
+      adz.warm: "true"
+      adz.engine: "gemini"
+      adz.workspace: ${GEMINI_WORKSPACE:-./cli-runner/volumes/workspace}
+      adz.creds: ${GEMINI_CREDS:-./cli-runner/volumes/creds}
+    user: "${UID:-1000}:${GID:-1000}"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=256m
+    cpus: ${GEMINI_CPUS:-1.0}
+    mem_limit: ${GEMINI_MEM:-2g}
+
+  opencode:
+    build:
+      context: ./cli-runner/docker
+    image: ${CLI_RUNNER_IMAGE:-cli-runner:latest}
+    environment:
+      ENGINE: opencode
+    volumes:
+      - ${OPENCODE_WORKSPACE:-./cli-runner/volumes/workspace}:/workspace:rw
+      - ${OPENCODE_CREDS:-./cli-runner/volumes/creds}:/home/agent/.creds:rw
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    user: "${UID:-1000}:${GID:-1000}"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=256m
+    cpus: ${OPENCODE_CPUS:-1.0}
+    mem_limit: ${OPENCODE_MEM:-2g}
+
+  warm-opencode:
+    build:
+      context: ./cli-runner/docker
+    image: ${CLI_RUNNER_IMAGE:-cli-runner:latest}
+    environment:
+      ENGINE: opencode
+    volumes:
+      - ${OPENCODE_WORKSPACE:-./cli-runner/volumes/workspace}:/workspace:rw
+      - ${OPENCODE_CREDS:-./cli-runner/volumes/creds}:/home/agent/.creds:rw
+    working_dir: /workspace
+    tty: true
+    entrypoint: ["bash","-lc","sleep infinity"]
+    labels:
+      adz.warm: "true"
+      adz.engine: "opencode"
+      adz.workspace: ${OPENCODE_WORKSPACE:-./cli-runner/volumes/workspace}
+      adz.creds: ${OPENCODE_CREDS:-./cli-runner/volumes/creds}
+    user: "${UID:-1000}:${GID:-1000}"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=256m
+    cpus: ${OPENCODE_CPUS:-1.0}
+    mem_limit: ${OPENCODE_MEM:-2g}
+
+  # Add more services or duplicates for parallel runs by copying one of the above
+  # and pointing to different WORKSPACE/CREDS.

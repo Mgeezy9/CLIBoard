@@ -1,0 +1,10 @@
+{
+  "logging": {
+    "level": "info"
+  },
+  "mcp": {
+    "servers": [
+      /* Example: { "name": "fs", "command": "mcp-filesystem", "args": ["--root", "/workspace"] } */
+    ]
+  }
+}

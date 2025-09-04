@@ -1,0 +1,41 @@
+theme = "opencode"
+provider = "groq"
+model = "moonshotai/kimi-k2-instruct"
+agent = "build"
+recently_used_agents = []
+show_tool_details = false
+
+[agent_model]
+  [agent_model.build]
+    provider_id = "groq"
+    model_id = "moonshotai/kimi-k2-instruct"
+
+[[recently_used_models]]
+  provider_id = "groq"
+  model_id = "moonshotai/kimi-k2-instruct"
+  last_used = 2025-09-04T19:27:01.622925263Z
+
+[[recently_used_models]]
+  provider_id = "opencode"
+  model_id = "qwen/qwen3-coder"
+  last_used = 2025-09-04T19:26:08.943835585Z
+
+[[recently_used_models]]
+  provider_id = "opencode"
+  model_id = "x-ai/grok-code-fast-1"
+  last_used = 2025-09-04T17:29:20.050981673Z
+
+[[message_history]]
+  text = "who are you"
+
+[[message_history]]
+  text = "hi"
+
+[[message_history]]
+  text = "hi"
+
+[[message_history]]
+  text = "hi"
+
+[[message_history]]
+  text = "hi"

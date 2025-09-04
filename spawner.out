@@ -1,0 +1,9 @@
+
+> cli-runner-spawner@0.1.0 start
+> node src/server.js
+
+[spawner] listening on http://127.0.0.1:8080
+[spawner] image=cli-runner:latest
+[spawner] allow workspaces: /Users/mahyarghadamie/DockerCliBoard/spawner/cli-runner/volumes/workspace
+[spawner] allow creds: /Users/mahyarghadamie/DockerCliBoard/spawner/cli-runner/volumes/creds
+[spawner] idle timeout: 900s
