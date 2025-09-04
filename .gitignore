@@ -118,3 +118,12 @@ Thumbs.db
 
 # Docker volumes (optional - uncomment if you want to ignore)
 # cli-runner/volumes/
+
+# Credentials and sensitive files
+cli-runner/volumes/creds/
+*.key
+*.pem
+*auth.json
+*config.toml
+*settings.json
+*version.json
