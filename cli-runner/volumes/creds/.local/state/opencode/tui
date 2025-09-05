@@ -13,7 +13,7 @@ show_tool_details = false
 [[recently_used_models]]
   provider_id = "groq"
   model_id = "moonshotai/kimi-k2-instruct"
-  last_used = 2025-09-04T19:27:01.622925263Z
+  last_used = 2025-09-04T22:00:14.339391171Z
 
 [[recently_used_models]]
   provider_id = "opencode"
@@ -24,6 +24,27 @@ show_tool_details = false
   provider_id = "opencode"
   model_id = "x-ai/grok-code-fast-1"
   last_used = 2025-09-04T17:29:20.050981673Z
+
+[[message_history]]
+  text = "hi"
+
+[[message_history]]
+  text = "hi"
+
+[[message_history]]
+  text = "f"
+
+[[message_history]]
+  text = "hu"
+
+[[message_history]]
+  text = "hi"
+
+[[message_history]]
+  text = "hello"
+
+[[message_history]]
+  text = "hi"
 
 [[message_history]]
   text = "who are you"

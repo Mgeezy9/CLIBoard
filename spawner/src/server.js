@@ -629,26 +629,48 @@ app.post('/runs/:id/input', async (req, res) => {
 
 app.delete('/runs/:id', async (req, res) => {
   const run = runs.get(req.params.id);
-  if (!run) return res.status(404).json({ error: 'not found' });
+  if (!run) {
+    try {
+      const list = await docker.listContainers({ all: true, filters: { label: [`adz.runId=${req.params.id}`] } });
+      for (const c of list) {
+        try { await docker.getContainer(c.Id).stop({ t: 2 }).catch(() => {}); } catch (_) {}
+        try { await docker.getContainer(c.Id).remove({ force: true }).catch(() => {}); } catch (_) {}
+      }
+      return res.json({ ok: true, removed: list.length > 0, fallback: true });
+    } catch (_) { return res.status(404).json({ error: 'not found' }); }
+  }
   if (run.isExec) {
     try { run.attachStream.write('\u0003'); } catch (_) {} // Ctrl-C
     try { run.attachStream.write('exit\n'); } catch (_) {}
     run.status = 'stopped';
     eventsBroadcast('run-stopped', { runId: run.id, engine: run.engine, workspace: run.workspace, warm: true });
-    return res.json({ ok: true });
+    try { run.listeners.forEach((r)=>{ try { r.end(); } catch(_){} }); run.listeners.clear(); } catch(_){}
+    runs.delete(run.id);
+    return res.json({ ok: true, removed: true });
   } else {
     try { await run.container.stop({ t: 2 }).catch(() => {}); } catch (_) {}
     try { await run.container.remove({ force: true }).catch(() => {}); } catch (_) {}
     run.status = 'stopped';
     eventsBroadcast('run-stopped', { runId: run.id, engine: run.engine, workspace: run.workspace, warm: false });
-    return res.json({ ok: true });
+    try { run.listeners.forEach((r)=>{ try { r.end(); } catch(_){} }); run.listeners.clear(); } catch(_){}
+    runs.delete(run.id);
+    return res.json({ ok: true, removed: true });
   }
 });
 
 // Immediate kill
 app.post('/runs/:id/kill', async (req, res) => {
   const run = runs.get(req.params.id);
-  if (!run) return res.status(404).json({ error: 'not found' });
+  if (!run) {
+    try {
+      const list = await docker.listContainers({ all: true, filters: { label: [`adz.runId=${req.params.id}`] } });
+      for (const c of list) {
+        try { await docker.getContainer(c.Id).kill().catch(() => {}); } catch (_) {}
+        try { await docker.getContainer(c.Id).remove({ force: true }).catch(() => {}); } catch (_) {}
+      }
+      return res.json({ ok: true, removed: list.length > 0, fallback: true });
+    } catch (_) { return res.status(404).json({ error: 'not found' }); }
+  }
   if (run.isExec) {
     // Kill only the CLI process inside container, keep warm container
     try {
@@ -660,14 +682,49 @@ app.post('/runs/:id/kill', async (req, res) => {
     } catch (_) {}
     run.status = 'killed';
     eventsBroadcast('run-killed', { runId: run.id, engine: run.engine, workspace: run.workspace, warm: true });
-    return res.json({ ok: true });
+    try { run.listeners.forEach((r)=>{ try { r.end(); } catch(_){} }); run.listeners.clear(); } catch(_){}
+    runs.delete(run.id);
+    return res.json({ ok: true, removed: true });
   } else {
     try { await run.container.kill().catch(() => {}); } catch (_) {}
     try { await run.container.remove({ force: true }).catch(() => {}); } catch (_) {}
     run.status = 'killed';
     eventsBroadcast('run-killed', { runId: run.id, engine: run.engine, workspace: run.workspace, warm: false });
-    return res.json({ ok: true });
+    try { run.listeners.forEach((r)=>{ try { r.end(); } catch(_){} }); run.listeners.clear(); } catch(_){}
+    runs.delete(run.id);
+    return res.json({ ok: true, removed: true });
   }
+});
+
+// Unified close endpoint: terminate process/container and remove from registry
+app.post('/runs/:id/close', async (req, res) => {
+  const run = runs.get(req.params.id);
+  if (!run) {
+    try {
+      const list = await docker.listContainers({ all: true, filters: { label: [`adz.runId=${req.params.id}`] } });
+      for (const c of list) {
+        try { await docker.getContainer(c.Id).kill().catch(() => {}); } catch (_) {}
+        try { await docker.getContainer(c.Id).remove({ force: true }).catch(() => {}); } catch (_) {}
+      }
+      return res.json({ ok: true, removed: list.length > 0, fallback: true });
+    } catch (_) { return res.status(404).json({ error: 'not found' }); }
+  }
+  try {
+    if (run.isExec) {
+      try { run.attachStream.end?.(); run.attachStream.destroy?.(); } catch(_){}
+      try {
+        const killer = await run.container.exec({ AttachStdout: false, AttachStderr: false, Tty: false, Cmd: ['bash','-lc', 'pkill -KILL -f "(/entrypoint.sh|codex|gemini|opencode)" || true'] });
+        await killer.start({});
+      } catch(_){}
+    } else {
+      try { await run.container.kill().catch(()=>{}); } catch(_){}
+      try { await run.container.remove({ force: true }).catch(()=>{}); } catch(_){}
+    }
+  } catch(_){}
+  try { run.listeners.forEach((r)=>{ try { r.end(); } catch(_){} }); run.listeners.clear(); } catch(_){}
+  runs.delete(run.id);
+  eventsBroadcast('run-closed', { runId: run.id, engine: run.engine, workspace: run.workspace, warm: !!run.isExec });
+  res.json({ ok: true, removed: true });
 });
 
 app.get('/runs/:id/meta', async (req, res) => {
@@ -767,6 +824,8 @@ app.get('/index.html', (req, res) => {
   res.set('Cache-Control', 'no-store');
   res.sendFile(path.join(publicDir, 'index.html'));
 });
+// Favicon placeholder to avoid 404 noise
+app.get('/favicon.ico', (req, res) => { res.status(204).end(); });
 // Static assets (ok to cache)
 app.use('/', express.static(publicDir));
 // Serve xterm assets locally to avoid CDN dependency
